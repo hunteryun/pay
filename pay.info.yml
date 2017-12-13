@@ -1,0 +1,5 @@
+name: Pay
+type: module
+description: Alipay and wechat payment.
+core: 1.x
+package: Hunter

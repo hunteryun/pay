@@ -1,0 +1,13 @@
+pay:
+  pay_config:
+    alipay:
+      app_id: ''
+      notify_url: ''
+      return_url: ''
+      ali_public_key: ''
+      private_key: ''
+    wechat:
+      app_id: ''
+      mch_id: ''
+      notify_url: ''
+      key: ''

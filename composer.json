@@ -1,0 +1,6 @@
+{
+    "require": {
+      "yansongda/pay": "^1.2",
+      "bacon/bacon-qr-code": "^1.0"
+    }
+}
