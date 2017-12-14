@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>会员支付</title>
+  </head>
+  <body>
+    <div id="app">
+     <form :action="pay_submit_url" method="post" autocomplete="on">
+        产品类型:
+        <input type="radio" value="xufei" name="product_type" v-model="product_type">会员续费
+        <input type="radio" value="wenda" name="product_type" v-model="product_type">问答产品
+        <input type="radio" value="video" name="product_type" v-model="product_type">视频课程
+        <input type="radio" value="other" name="product_type" v-model="product_type">其他类型<br />
+        <div class="month_num" v-if="show_month_num">
+        会员类别: <input type="radio" name="role_type" value="fufeiyonghu" v-model="role_type" />付费会员
+        <input type="radio" name="role_type" value="gaojiyonghu" v-model="role_type" />高级会员
+        </div>
+        <div class="month_num" v-if="show_month_num">
+        会员买多少天: <input type="radio" name="month_num" value="30" v-model="month_num" />一个月
+        <input type="radio" name="month_num" value="90" v-model="month_num" />三个月
+        <input type="radio" name="month_num" value="180" v-model="month_num" />半年
+        <input type="radio" name="month_num" value="365" v-model="month_num" />一年<br />
+        </div>
+        产品名称: <input type="text" name="name" /><br />
+        产品ID: <input type="text" name="product_id" /><br />
+        产品内容: <textarea name="product_content" placeholder="请输入内容"></textarea><br />
+        付款金额: <input type="text" name="total_amount" /><br />
+        付款人: 自动获取当前用户<br />
+        支付方式: <input type="radio" name="pay_type" value="alipay" v-model="pay_type" />支付宝
+        <input type="radio" name="pay_type" value="wechat" v-model="pay_type" />微信<br />
+        <div class="wechat_pay_type" v-if="show_wechat_pay_type">
+        微信支付类型: <input type="radio" name="wechat_pay_type" value="scan" v-model="wechat_pay_type" />扫码支付
+        <input type="radio" name="wechat_pay_type" value="mp" v-model="wechat_pay_type" />API调公众号支付签名<br />
+        </div>
+        <input type="submit">
+     </form>
+   </div>
+   <script src="https://unpkg.com/vue@2.5.9/dist/vue.js"></script>
+   <script>
+   new Vue({
+     el: "#app",
+     data: {
+       product_type: "xufei",
+       role_type: "fufeiyonghu",
+       pay_type: "alipay",
+       month_num: "30",
+       wechat_pay_type: "scan"
+     },
+     computed: {
+       show_month_num: function () {
+         var vm = this;
+         if(vm.product_type == "xufei"){
+           return true;
+         }else{
+           return false;
+         }
+       },
+       show_wechat_pay_type: function () {
+         var vm = this;
+         if(vm.pay_type == "wechat"){
+           return true;
+         }else{
+           return false;
+         }
+       },
+       pay_submit_url: function () {
+         var vm = this;
+         if(vm.pay_type == "alipay"){
+           return "/pay/alipay";
+         }else if(vm.pay_type == "wechat" && vm.wechat_pay_type == "scan") {
+           return "/pay/wechat";
+         }else{
+           return "/api/pay/wechat";
+         }
+       },
+     },
+     methods: {
+       update: function (e) {
+         this.input = e.target.value
+       }
+     }
+   })
+   </script>
+  </body>
+</html>

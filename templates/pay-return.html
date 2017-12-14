@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>会员支付</title>
+  </head>
+  <body>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+      <legend>恭喜你，支付成功</legend>
+
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>订单号</th>
+            <th>用户ID</th>
+            <th>产品类型</th>
+            <th>支付方式</th>
+            <th>产品名称</th>
+            <th>产品ID</th>
+            <th>产品内容</th>
+            <th>支付费用</th>
+            <th>订单状态</th>
+            <th>会员等级</th>
+            <th>开通时间</th>
+            <th>到期时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ parms.out_trade_no }}</td>
+            <td>{{ parms.user_id }}</td>
+            <td>{{ parms.product_type }}</td>
+            <td>{{ parms.pay_type }}</td>
+            <td>{{ parms.name }}</td>
+            <td>{{ parms.pid }}</td>
+            <td>{{ parms.product_content }}</td>
+            <td>{{ parms.total_fee }}</td>
+            <td>{{ parms.status }}</td>
+            <td>{{ parms.role_type }}</td>
+            <td>{{ parms.role_start_time }}</td>
+            <td>{{ parms.role_end_time }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </fieldset>
+  </body>
+</html>
