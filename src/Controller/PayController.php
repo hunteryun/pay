@@ -57,7 +57,7 @@ class PayController {
           'total_fee' => $parms['total_amount'],
           'month_num' => isset($parms['month_num']) ? $parms['month_num'] : '',
           'role_type' => isset($parms['role_type']) ? $parms['role_type'] : '',
-          'uid' => $user->uid,
+          'uid' => isset($user->uid) ? $user->uid : 0,
           'created' => time(),
           'updated' => time(),
         ))
@@ -101,7 +101,7 @@ class PayController {
           'total_fee' => $parms['total_amount'],
           'month_num' => isset($parms['month_num']) ? $parms['month_num'] : '',
           'role_type' => isset($parms['role_type']) ? $parms['role_type'] : '',
-          'uid' => $user->uid,
+          'uid' => isset($user->uid) ? $user->uid : 0,
           'created' => time(),
           'updated' => time(),
         ))
@@ -113,7 +113,7 @@ class PayController {
           'total_fee' => $parms['total_amount'],  // 订单金额，**单位：分**
           'body' => $parms['name'],               // 订单描述
           'spbill_create_ip' => '8.8.8.8',        // 调用 API 服务器的 IP
-          'product_id' => $parms['product_id'],          // 订单商品 ID
+          'product_id' => $parms['product_id'],   // 订单商品 ID
         ];
 
         $pay = new Pay($this->pay_config);
@@ -156,7 +156,7 @@ class PayController {
           'total_fee' => $parms['total_amount'],
           'month_num' => isset($parms['month_num']) ? $parms['month_num'] : '',
           'role_type' => isset($parms['role_type']) ? $parms['role_type'] : '',
-          'uid' => $user->uid,
+          'uid' => isset($user->uid) ? $user->uid : 0,
           'created' => time(),
           'updated' => time(),
         ))
@@ -265,7 +265,79 @@ class PayController {
    *   Return PayConfigForm string.
    */
   public function PayConfigForm(ServerRequest $request) {
-    return 'Implement method: PayConfigForm';
+    $form['setting']['alipay'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Alipay Setting'),
+      '#tree' => TRUE,
+    ];
+
+    $form['setting']['alipay']['app_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('App ID'),
+      '#default_value' => $this->pay_config['alipay']['app_id'],
+    );
+
+    $form['setting']['alipay']['notify_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Notify Url'),
+      '#default_value' => $this->pay_config['alipay']['notify_url'],
+    );
+
+    $form['setting']['alipay']['return_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Return Url'),
+      '#default_value' => $this->pay_config['alipay']['return_url'],
+    );
+
+    $form['setting']['alipay']['ali_public_key'] = [
+      '#type' => 'textarea',
+      '#title' => t('Public Key'),
+      '#rows' => '5',
+      '#default_value' => $this->pay_config['alipay']['ali_public_key'],
+    ];
+
+    $form['setting']['alipay']['private_key'] = [
+      '#type' => 'textarea',
+      '#title' => t('Private Key'),
+      '#rows' => '5',
+      '#default_value' => $this->pay_config['alipay']['private_key'],
+    ];
+
+    $form['setting']['wechat'] = [
+      '#type' => 'fieldset',
+      '#title' => t('Wechat Setting'),
+      '#tree' => TRUE,
+    ];
+
+    $form['setting']['wechat']['app_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('App ID'),
+      '#description' => t('微信公众号APPID.'),
+      '#default_value' => $this->pay_config['wechat']['app_id'],
+    );
+
+    $form['setting']['wechat']['mch_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mch ID'),
+      '#description' => t('微信商户号.'),
+      '#default_value' => $this->pay_config['wechat']['mch_id'],
+    );
+
+    $form['setting']['wechat']['notify_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Notify Url'),
+      '#default_value' => $this->pay_config['wechat']['notify_url'],
+    );
+
+    $form['setting']['wechat']['key'] = [
+      '#type' => 'textarea',
+      '#title' => t('Public Key'),
+      '#rows' => '5',
+      '#description' => t('微信支付签名秘钥.'),
+      '#default_value' => $this->pay_config['wechat']['key'],
+    ];
+
+    return view('/admin/pay-config.html', array('form' => $form));
   }
 
 }
