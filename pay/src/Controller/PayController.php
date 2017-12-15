@@ -4,6 +4,7 @@ namespace Hunter\pay\Controller;
 
 use Zend\Diactoros\ServerRequest;
 use Zend\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response;
 use Yansongda\Pay\Pay;
 use BaconQrCode\Renderer\Image\Png;
 
@@ -128,7 +129,9 @@ class PayController {
           $writer = new \BaconQrCode\Writer($renderer);
           $qrcode_output = $writer->writeString($wechat_pay_url, 'UTF-8');
 
-          return new Response($qrcode_output, Response::HTTP_OK, array('content-type' => 'image/png'));
+          $response = new Response();
+          $response->getBody()->write($qrcode_output);
+          return $response->withAddedHeader('content-type', 'image/png');
         }
       }
     }
@@ -203,39 +206,43 @@ class PayController {
       }
 
       //验证通过后,再验证其他信息，并在成功后更新支付记录状态
-      $record_entities = \Drupal::entityTypeManager()->getStorage('pay_record_entity')->loadByProperties(['out_trade_no' => $parms['out_trade_no']]);
-      $record_entitie = reset($record_entities);
-      if ($record_entitie
-      && $parms['total_amount'] * 100 == $record_entitie->total_fee->value * 100
+      $record = get_pay_record_bytrade_no($parms['out_trade_no']);
+      if ($record
+      && $parms['total_amount'] * 100 == $record->total_fee * 100
       && $parms['app_id'] == $this->pay_config['alipay']['app_id']) {
-        $record_entitie->status->value = 1;
-        $record_entitie->save();
+        db_update('pay_record')
+          ->fields(array(
+            'status' => 1,
+            'updated' => time(),
+          ))
+          ->condition('out_trade_no', $parms['out_trade_no'])
+          ->execute();
       }else{
         hunter_set_message('非法请求', 'error');
       }
 
-      //验证通过后,如果商品类型是会员续费，则添加用户角色及有效期
-      if($record_entitie->product_type->value == 'xufei'){
-        $adddays = $record_entitie->month_num->value;
-        $uid = $record_entitie->getOwnerId();
-        $account = user_load($uid);
-        $account->field_role_start_time->value = date('Y-m-d\T00:00:00', time());
-        $account->field_role_end_time->value = date('Y-m-d\T00:00:00', strtotime("+$adddays day"));
-        $account->addRole($record_entitie->role_type->value);
-        $account->save();
-      }
+      //验证通过后,如果商品类型是会员续费，则添加用户角色及有效期, 请自行修改逻辑
+      // if($record->product_type == 'xufei'){
+      //   $adddays = $record->month_num;
+      //   $uid = $record->uid;
+      //   $account = get_user_byid($uid);
+      //   $account->role_start_time = date('Y-m-d\T00:00:00', time());
+      //   $account->role_end_time = date('Y-m-d\T00:00:00', strtotime("+$adddays day"));
+      //   $account->role = $record->role_type;
+      //   $account->save();
+      // }
 
       $role_type = '';
-      if($record_entitie->role_type->value == 'gaojiyonghu') {
-        $role_type = "高级用户";
-      }elseif ($record_entitie->role_type->value == 'fufeiyonghu') {
-        $role_type = "付费用户";
+      if($record->role_type == 'gaojiyonghu') {
+        $record->role_type = "高级用户";
+      }elseif ($record->role_type == 'fufeiyonghu') {
+        $record->role_type = "付费用户";
       }else {
-        $role_type = "普通用户";
+        $record->role_type = "普通用户";
       }
     }
 
-    return view('/hunter/pay-return.html', array('parms' => $parms));
+    return view('/hunter/pay-return.html', array('parms' => $record));
   }
 
   /**
@@ -245,7 +252,35 @@ class PayController {
    *   Return payAlipayNotify string.
    */
   public function payAlipayNotify(ServerRequest $request) {
-    return 'Implement method: payAlipayNotify';
+    $pay = new Pay($this->pay_config);
+    $parms = $request->getParsedBody();
+    if ($pay->driver('alipay')->gateway()->verify($parms)) {
+        // 验证通过后,对其他参数进行验证
+        $record = get_pay_record_bytrade_no($parms['out_trade_no']);
+        if ($parms['trade_status'] === "TRADE_SUCCESS"
+        && $record
+        && $parms['total_amount'] * 100 == $record->total_fee * 100
+        && $parms['app_id'] == $this->pay_config['alipay']['app_id']) {
+          $message = "收到来自支付宝的异步通知\r\n";
+          $message .= '订单号：' .$parms['out_trade_no']. "\r\n";
+          $message .= '订单金额：' .$parms['total_amount']. "\r\n\r\n";
+          hunter_set_message($message);
+
+          //验证通过后, 更新支付记录状态
+          db_update('pay_record')
+            ->fields(array(
+              'status' => 1,
+              'updated' => time(),
+            ))
+            ->condition('out_trade_no', $parms['out_trade_no'])
+            ->execute();
+
+          return 'success';
+        }
+        return 'fail';
+    } else {
+      return 'fail';
+    }
   }
 
   /**
@@ -255,7 +290,51 @@ class PayController {
    *   Return payWechatNotify string.
    */
   public function payWechatNotify(ServerRequest $request) {
-    return 'Implement method: payWechatNotify';
+      $pay = new Pay($this->pay_config);
+      $verify = $pay->driver('wechat')->gateway('mp')->verify($request->getContent());
+
+      if ($verify) {
+        //验证通过后,对其他参数进行验证
+        $record = get_pay_record_bytrade_no($verify['out_trade_no']);
+        if (array_key_exists("return_code", $verify)
+  			&& array_key_exists("result_code", $verify)
+  			&& $verify["return_code"] == "SUCCESS"
+  			&& $verify["result_code"] == "SUCCESS"
+        && $record
+        && $verify['total_fee'] * 100 == $record->total_fee * 100
+        && $verify['appid'] == $this->pay_config['wechat']['app_id']) {
+
+          $message = "收到来自微信的异步通知\r\n";
+          $message .= '订单号：' . $verify['out_trade_no'] . "\r\n";
+          $message .= '订单金额：' . $verify['total_fee'] . "\r\n\r\n";
+          hunter_set_message($message);
+
+        //验证通过后, 更新支付记录状态
+        db_update('pay_record')
+          ->fields(array(
+            'status' => 1,
+            'updated' => time(),
+          ))
+          ->condition('out_trade_no', $verify['out_trade_no'])
+          ->execute();
+
+          //验证通过后,如果商品类型是会员续费，则添加用户角色及有效期, 请自行修改逻辑
+          // if($record->product_type == 'xufei'){
+          //   $adddays = $record->month_num;
+          //   $uid = $record->uid;
+          //   $account = get_user_byid($uid);
+          //   $account->role_start_time = date('Y-m-d\T00:00:00', time());
+          //   $account->role_end_time = date('Y-m-d\T00:00:00', strtotime("+$adddays day"));
+          //   $account->role = $record->role_type;
+          //   $account->save();
+          // }
+
+          return 'success';
+        }
+        return 'fail';
+      } else {
+        return 'fail';
+      }
   }
 
   /**

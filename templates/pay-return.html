@@ -21,24 +21,20 @@
             <th>支付费用</th>
             <th>订单状态</th>
             <th>会员等级</th>
-            <th>开通时间</th>
-            <th>到期时间</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>{{ parms.out_trade_no }}</td>
-            <td>{{ parms.user_id }}</td>
-            <td>{{ parms.product_type }}</td>
-            <td>{{ parms.pay_type }}</td>
-            <td>{{ parms.name }}</td>
-            <td>{{ parms.pid }}</td>
-            <td>{{ parms.product_content }}</td>
-            <td>{{ parms.total_fee }}</td>
-            <td>{{ parms.status }}</td>
-            <td>{{ parms.role_type }}</td>
-            <td>{{ parms.role_start_time }}</td>
-            <td>{{ parms.role_end_time }}</td>
+            <td>{{ $parms->out_trade_no }}</td>
+            <td>{{ $parms->uid }}</td>
+            <td>{{ $parms->product_type }}</td>
+            <td>{{ $parms->pay_type }}</td>
+            <td>{{ $parms->name }}</td>
+            <td>{{ $parms->product_id }}</td>
+            <td>{{ $parms->product_content }}</td>
+            <td>{{ $parms->total_fee }}</td>
+            <td>{{ $parms->status }}</td>
+            <td>{{ $parms->role_type }}</td>
           </tr>
         </tbody>
       </table>

@@ -1,1 +1,13 @@
 <?php
+/**
+ * get pay record by trade_no
+ */
+function get_pay_record_bytrade_no($out_trade_no) {
+    $page = db_select('pay_record', 'p')
+      ->fields('p')
+      ->condition('p.out_trade_no', $out_trade_no)
+      ->execute()
+      ->fetchObject();
+
+    return $page;
+}
