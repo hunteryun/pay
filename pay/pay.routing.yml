@@ -3,46 +3,51 @@ pay.pay_payPage:
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payPage'
     _title: 'PayPage'
-  
+
 pay.pay_payAlipay:
   path: '/pay/alipay'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payAlipay'
     _title: 'Alipay Method'
-  
+
 pay.pay_payWechatScan:
   path: '/pay/wechat'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payWechatScan'
     _title: 'Pay Wechat Scan Method'
-  
+
 pay.pay_payWechatMp:
   path: '/api/pay/wechat'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payWechatMp'
     _title: 'Pay Wechat Mp Method'
-  
+
 pay.pay_payAlipayReturn:
   path: '/pay/alipay/return'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payAlipayReturn'
     _title: 'Pay Alipay Return'
-  
+
 pay.pay_payAlipayNotify:
   path: '/pay/alipay/notify'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payAlipayNotify'
     _title: 'PayAlipay Notify'
-  
+
 pay.pay_payWechatNotify:
   path: '/pay/wechat/notify'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::payWechatNotify'
     _title: 'PayWechat Notify'
-  
+
 pay.pay_PayConfigForm:
   path: '/admin/config/pay'
   defaults:
     _controller: '\Hunter\pay\Controller\PayController::PayConfigForm'
     _title: 'Pay Config'
-  
+
+pay.pay_PayConfigFormSubmit:
+  path: '/admin/config/pay/submit'
+  defaults:
+    _controller: '\Hunter\pay\Controller\PayController::PayConfigFormSubmit'
+    _title: 'Pay Config Submit'

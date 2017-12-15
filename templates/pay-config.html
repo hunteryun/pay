@@ -27,20 +27,17 @@
             form.on('submit(configSubmit)', function(data) {
                 $.ajax({
                     type: "POST",
-                    url: "/admin/page/add", //后台程序地址
+                    url: "/admin/config/pay/submit", //后台程序地址
                     data: data.field, //需要post的数据
                     success: function(msg) { //后台程序返回的标签，比如我喜欢使用1和0 表示成功或者失败
-                        var index = parent.layer.getFrameIndex(window.name);
                         if (!msg) {
                             layer.msg('操作失败', {
                                 icon: 5
                             });
-
-                            parent.layui.jquery("#iframe_status").val('0');
-                            parent.layer.close(index);
                         } else {
-                            parent.layui.jquery("#iframe_status").val('1');
-                            parent.layer.close(index);
+                          layer.msg('保存成功', {
+                              icon: 1
+                          });
                         }
                     }
                 });

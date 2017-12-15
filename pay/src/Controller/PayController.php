@@ -265,71 +265,69 @@ class PayController {
    *   Return PayConfigForm string.
    */
   public function PayConfigForm(ServerRequest $request) {
-    $form['setting']['alipay'] = [
+    $form['alipay_setting'] = [
       '#type' => 'fieldset',
       '#title' => t('Alipay Setting'),
-      '#tree' => TRUE,
     ];
 
-    $form['setting']['alipay']['app_id'] = array(
+    $form['alipay_app_id'] = array(
       '#type' => 'textfield',
       '#title' => t('App ID'),
       '#default_value' => $this->pay_config['alipay']['app_id'],
     );
 
-    $form['setting']['alipay']['notify_url'] = array(
+    $form['alipay_notify_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Notify Url'),
       '#default_value' => $this->pay_config['alipay']['notify_url'],
     );
 
-    $form['setting']['alipay']['return_url'] = array(
+    $form['alipay_return_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Return Url'),
       '#default_value' => $this->pay_config['alipay']['return_url'],
     );
 
-    $form['setting']['alipay']['ali_public_key'] = [
+    $form['alipay_ali_public_key'] = [
       '#type' => 'textarea',
       '#title' => t('Public Key'),
       '#rows' => '5',
       '#default_value' => $this->pay_config['alipay']['ali_public_key'],
     ];
 
-    $form['setting']['alipay']['private_key'] = [
+    $form['alipay_private_key'] = [
       '#type' => 'textarea',
       '#title' => t('Private Key'),
       '#rows' => '5',
       '#default_value' => $this->pay_config['alipay']['private_key'],
     ];
 
-    $form['setting']['wechat'] = [
+    $form['wechat_setting'] = [
       '#type' => 'fieldset',
       '#title' => t('Wechat Setting'),
-      '#tree' => TRUE,
     ];
 
-    $form['setting']['wechat']['app_id'] = array(
+    $form['wechat_app_id'] = array(
       '#type' => 'textfield',
       '#title' => t('App ID'),
       '#description' => t('微信公众号APPID.'),
       '#default_value' => $this->pay_config['wechat']['app_id'],
     );
 
-    $form['setting']['wechat']['mch_id'] = array(
+    $form['wechat_mch_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Mch ID'),
       '#description' => t('微信商户号.'),
       '#default_value' => $this->pay_config['wechat']['mch_id'],
     );
 
-    $form['setting']['wechat']['notify_url'] = array(
+    $form['wechat_notify_url'] = array(
       '#type' => 'textfield',
       '#title' => t('Notify Url'),
       '#default_value' => $this->pay_config['wechat']['notify_url'],
     );
 
-    $form['setting']['wechat']['key'] = [
+    $form['wechat_key'] = [
       '#type' => 'textarea',
       '#title' => t('Public Key'),
       '#rows' => '5',
@@ -337,7 +335,36 @@ class PayController {
       '#default_value' => $this->pay_config['wechat']['key'],
     ];
 
+    $form['save'] = array(
+     '#type' => 'submit',
+     '#value' => t('Save'),
+     '#attributes' => array('lay-submit' => '', 'lay-filter' => 'configSubmit'),
+    );
+
     return view('/admin/pay-config.html', array('form' => $form));
+  }
+
+  /**
+   * PayConfigFormSubmit.
+   *
+   * @return string
+   *   Return PayConfigFormSubmit string.
+   */
+  public function PayConfigFormSubmit(ServerRequest $request) {
+    if ($values = $request->getParsedBody()) {
+      $config = config('pay.pay');
+      $config->set('pay_config.alipay.app_id', $values['alipay_app_id']);
+      $config->set('pay_config.alipay.notify_url', $values['alipay_notify_url']);
+      $config->set('pay_config.alipay.return_url', $values['alipay_return_url']);
+      $config->set('pay_config.alipay.ali_public_key', $values['alipay_ali_public_key']);
+      $config->set('pay_config.alipay.private_key', $values['alipay_private_key']);
+      $config->set('pay_config.wechat.app_id', $values['wechat_app_id']);
+      $config->set('pay_config.wechat.mch_id', $values['wechat_mch_id']);
+      $config->set('pay_config.wechat.notify_url', $values['wechat_notify_url']);
+      $config->set('pay_config.wechat.key', $values['wechat_key']);
+      $config->save();
+      return true;
+    }
   }
 
 }
